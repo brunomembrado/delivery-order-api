@@ -1,0 +1,505 @@
+{
+  "info": {
+    "name": "Delivery Order API",
+    "description": "API collection for the Delivery Order Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api/v1"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Authentication endpoints",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@delivery.local\",\n  \"password\": \"Admin123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticate user and get JWT tokens"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.data.tokens.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"Password123!\",\n  \"name\": \"New User\",\n  \"role\": \"RETAILER\",\n  \"retailerId\": \"{{retailerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new user"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Refresh access token"
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Get current authenticated user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "description": "Order management endpoints",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"retailerId\": \"{{retailerId}}\",\n  \"customerId\": \"cust-001\",\n  \"customerName\": \"John Doe\",\n  \"customerEmail\": \"john.doe@example.com\",\n  \"deliveryAddress\": {\n    \"street\": \"123 Main St\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"postalCode\": \"10001\",\n    \"country\": \"USA\"\n  },\n  \"items\": [\n    {\n      \"productId\": \"prod-001\",\n      \"productName\": \"Wireless Headphones\",\n      \"quantity\": 2,\n      \"unitPrice\": 99.99\n    }\n  ],\n  \"notes\": \"Please handle with care\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"]
+            },
+            "description": "Create a new order"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('orderId', response.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "CREATED",
+                  "disabled": true
+                },
+                {
+                  "key": "retailerId",
+                  "value": "{{retailerId}}",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List all orders with optional filters"
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "{{orderId}}"]
+            },
+            "description": "Get a specific order by ID"
+          }
+        },
+        {
+          "name": "Get Order by Order Number",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/number/ORD-SEED-001",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "number", "ORD-SEED-001"]
+            },
+            "description": "Get a specific order by order number"
+          }
+        },
+        {
+          "name": "Update Order Status - Confirm",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "{{orderId}}", "status"]
+            },
+            "description": "Confirm an order (CREATED -> CONFIRMED)"
+          }
+        },
+        {
+          "name": "Update Order Status - Dispatch",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DISPATCHED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "{{orderId}}", "status"]
+            },
+            "description": "Dispatch an order (CONFIRMED -> DISPATCHED)"
+          }
+        },
+        {
+          "name": "Update Order Status - Deliver",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DELIVERED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "{{orderId}}", "status"]
+            },
+            "description": "Deliver an order (DISPATCHED -> DELIVERED)"
+          }
+        },
+        {
+          "name": "Update Order Status - Cancel",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CANCELLED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "{{orderId}}", "status"]
+            },
+            "description": "Cancel an order (only from CREATED or CONFIRMED)"
+          }
+        },
+        {
+          "name": "Add Item to Order",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"prod-002\",\n  \"productName\": \"Phone Case\",\n  \"quantity\": 1,\n  \"unitPrice\": 29.99\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/items",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "{{orderId}}", "items"]
+            },
+            "description": "Add an item to an order (only in CREATED status)"
+          }
+        },
+        {
+          "name": "Remove Item from Order",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/items/prod-002",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "{{orderId}}", "items", "prod-002"]
+            },
+            "description": "Remove an item from an order (only in CREATED status)"
+          }
+        },
+        {
+          "name": "Get Order Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "stats"]
+            },
+            "description": "Get order statistics by status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Retailers",
+      "description": "Retailer management endpoints (Admin only)",
+      "item": [
+        {
+          "name": "Create Retailer",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Retailer\",\n  \"email\": \"new.retailer@example.com\",\n  \"phone\": \"+1-555-0123\",\n  \"address\": {\n    \"street\": \"456 Business Ave\",\n    \"city\": \"Los Angeles\",\n    \"state\": \"CA\",\n    \"postalCode\": \"90001\",\n    \"country\": \"USA\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/retailers",
+              "host": ["{{baseUrl}}"],
+              "path": ["retailers"]
+            },
+            "description": "Create a new retailer (Admin only)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('retailerId', response.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Retailers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/retailers?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["retailers"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List all retailers (Admin only)"
+          }
+        },
+        {
+          "name": "Get Retailer by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/retailers/{{retailerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["retailers", "{{retailerId}}"]
+            },
+            "description": "Get a specific retailer by ID"
+          }
+        },
+        {
+          "name": "Update Retailer",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Retailer Name\",\n  \"phone\": \"+1-555-9999\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/retailers/{{retailerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["retailers", "{{retailerId}}"]
+            },
+            "description": "Update a retailer"
+          }
+        },
+        {
+          "name": "Delete Retailer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/retailers/{{retailerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["retailers", "{{retailerId}}"]
+            },
+            "description": "Delete a retailer (Admin only)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "description": "Health check endpoint",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check API health status"
+          }
+        }
+      ]
+    }
+  ]
+}

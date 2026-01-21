@@ -1,0 +1,63 @@
+{
+  "name": "delivery-order-api",
+  "version": "1.0.0",
+  "description": "Production-grade delivery order management system",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "shared",
+    "web-portal"
+  ],
+  "scripts": {
+    "dev": "npm run docker:up && npm run dev:setup && npm run dev:all",
+    "dev:setup": "wait-on tcp:5432 && npm run db:push && npm run db:seed",
+    "dev:all": "concurrently -n backend,frontend -c blue,green \"npm run dev:order-service\" \"wait-on http-get://localhost:3001/api/v1/health && npm run dev:web\"",
+    "dev:order-service": "npm run dev -w services/order-service",
+    "dev:web": "npm run dev -w web-portal",
+    "build:order-service": "npm run build -w services/order-service",
+    "build:web": "npm run build -w web-portal",
+    "test": "npm run test -w services/order-service",
+    "test:coverage": "npm run test:coverage -w services/order-service",
+    "db:migrate": "npm run db:migrate -w services/order-service",
+    "db:push": "npm run db:push -w services/order-service",
+    "db:generate": "npm run db:generate -w services/order-service",
+    "db:seed": "npm run db:seed -w services/order-service",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run lint && npm run format:check && npm run typecheck",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
+    "concurrently": "^9.2.1",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.0",
+    "wait-on": "^9.0.3"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@delivery/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities for delivery order system",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "zod": "^3.22.4",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  }
+}

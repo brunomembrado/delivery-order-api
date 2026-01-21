@@ -1,0 +1,138 @@
+// Prisma Schema for Delivery Order API
+// Clean Architecture - Infrastructure Layer
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// User Model
+// ==========================================
+model User {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  password    String
+  name        String
+  role        UserRole  @default(RETAILER)
+  retailerId  String?   @map("retailer_id")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  lastLoginAt DateTime? @map("last_login_at")
+
+  // Relations
+  retailer Retailer? @relation(fields: [retailerId], references: [id], onDelete: SetNull)
+
+  @@index([email])
+  @@index([retailerId])
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  RETAILER
+}
+
+// ==========================================
+// Retailer Model
+// ==========================================
+model Retailer {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  phone     String?
+
+  // Address fields (embedded)
+  street     String?
+  city       String?
+  state      String?
+  postalCode String?  @map("postal_code")
+  country    String?
+
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  orders Order[]
+  users  User[]
+
+  @@index([email])
+  @@map("retailers")
+}
+
+// ==========================================
+// Order Model
+// ==========================================
+model Order {
+  id            String      @id @default(uuid())
+  orderNumber   String      @unique @map("order_number")
+  retailerId    String      @map("retailer_id")
+  customerId    String      @map("customer_id")
+  customerName  String      @map("customer_name")
+  customerEmail String      @map("customer_email")
+
+  // Delivery Address (embedded)
+  deliveryStreet     String  @map("delivery_street")
+  deliveryCity       String  @map("delivery_city")
+  deliveryState      String  @map("delivery_state")
+  deliveryPostalCode String  @map("delivery_postal_code")
+  deliveryCountry    String  @map("delivery_country")
+
+  status        OrderStatus @default(CREATED)
+  notes         String?
+
+  // Timestamps
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  confirmedAt   DateTime?   @map("confirmed_at")
+  dispatchedAt  DateTime?   @map("dispatched_at")
+  deliveredAt   DateTime?   @map("delivered_at")
+  cancelledAt   DateTime?   @map("cancelled_at")
+
+  // Relations
+  retailer Retailer    @relation(fields: [retailerId], references: [id], onDelete: Cascade)
+  items    OrderItem[]
+
+  @@index([orderNumber])
+  @@index([retailerId])
+  @@index([customerId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  CREATED
+  CONFIRMED
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
+
+// ==========================================
+// Order Item Model
+// ==========================================
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String   @map("order_id")
+  productId   String   @map("product_id")
+  productName String   @map("product_name")
+  quantity    Int
+  unitPrice   Decimal  @map("unit_price") @db.Decimal(10, 2)
+  currency    String   @default("USD")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
