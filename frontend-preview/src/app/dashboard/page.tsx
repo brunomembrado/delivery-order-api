@@ -18,9 +18,12 @@ import {
   LogOut,
   Plus,
   RefreshCw,
+  Edit,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Order, OrderStats, OrderStatus } from '@/types';
+import CreateOrderModal from '@/components/CreateOrderModal';
+import EditOrderModal from '@/components/EditOrderModal';
 
 /**
  * Configuration for order status display.
@@ -29,16 +32,14 @@ import { Order, OrderStats, OrderStatus } from '@/types';
  * @constant
  * @type {Record<OrderStatus, { label: string; color: string; icon: React.ElementType }>}
  */
-const statusConfig: Record<
-  OrderStatus,
-  { label: string; color: string; icon: React.ElementType }
-> = {
-  CREATED: { label: 'Created', color: 'status-created', icon: Clock },
-  CONFIRMED: { label: 'Confirmed', color: 'status-confirmed', icon: CheckCircle },
-  DISPATCHED: { label: 'Dispatched', color: 'status-dispatched', icon: Truck },
-  DELIVERED: { label: 'Delivered', color: 'status-delivered', icon: CheckCircle },
-  CANCELLED: { label: 'Cancelled', color: 'status-cancelled', icon: XCircle },
-};
+const statusConfig: Record<OrderStatus, { label: string; color: string; icon: React.ElementType }> =
+  {
+    CREATED: { label: 'Created', color: 'status-created', icon: Clock },
+    CONFIRMED: { label: 'Confirmed', color: 'status-confirmed', icon: CheckCircle },
+    DISPATCHED: { label: 'Dispatched', color: 'status-dispatched', icon: Truck },
+    DELIVERED: { label: 'Delivered', color: 'status-delivered', icon: CheckCircle },
+    CANCELLED: { label: 'Cancelled', color: 'status-cancelled', icon: XCircle },
+  };
 
 /**
  * Dashboard page component for viewing and managing orders.
@@ -78,6 +79,15 @@ export default function DashboardPage(): React.JSX.Element {
 
   /** Current status filter for order list */
   const [statusFilter, setStatusFilter] = useState<string>('');
+
+  /** Whether the create order modal is open */
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  /** Whether the edit order modal is open */
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  /** Order being edited */
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
 
   /**
    * Effect hook to redirect unauthenticated users to login.
@@ -175,9 +185,7 @@ export default function DashboardPage(): React.JSX.Element {
             <div className="flex items-center space-x-3">
               <Package className="h-8 w-8 text-primary-600" />
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">
-                  Delivery Order Portal
-                </h1>
+                <h1 className="text-xl font-semibold text-gray-900">Delivery Order Portal</h1>
                 <p className="text-sm text-gray-500">
                   {session?.user?.name} ({(session?.user as { role?: string })?.role})
                 </p>
@@ -225,7 +233,7 @@ export default function DashboardPage(): React.JSX.Element {
           <div className="flex items-center space-x-4">
             <select
               value={statusFilter}
-              onChange={(e) => {
+              onChange={e => {
                 setStatusFilter(e.target.value);
                 fetchData();
               }}
@@ -238,14 +246,18 @@ export default function DashboardPage(): React.JSX.Element {
                 </option>
               ))}
             </select>
-            <button
-              onClick={fetchData}
-              className="btn-secondary flex items-center space-x-2"
-            >
+            <button onClick={fetchData} className="btn-secondary flex items-center space-x-2">
               <RefreshCw className="h-4 w-4" />
               <span>Refresh</span>
             </button>
           </div>
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="btn-primary flex items-center space-x-2"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Create Order</span>
+          </button>
         </div>
 
         {/* Orders Table */}
@@ -278,23 +290,17 @@ export default function DashboardPage(): React.JSX.Element {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {orders.map((order) => {
+                {orders.map(order => {
                   const config = statusConfig[order.status];
                   const nextStatus = getNextStatus(order.status);
                   return (
                     <tr key={order.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {order.orderNumber}
-                        </div>
+                        <div className="text-sm font-medium text-gray-900">{order.orderNumber}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {order.customerName}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {order.customerEmail}
-                        </div>
+                        <div className="text-sm text-gray-900">{order.customerName}</div>
+                        <div className="text-sm text-gray-500">{order.customerEmail}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {order.itemCount} items
@@ -303,9 +309,7 @@ export default function DashboardPage(): React.JSX.Element {
                         ${order.totalAmount.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`status-badge ${config.color}`}>
-                          {config.label}
-                        </span>
+                        <span className={`status-badge ${config.color}`}>{config.label}</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(order.createdAt).toLocaleDateString()}
@@ -317,6 +321,16 @@ export default function DashboardPage(): React.JSX.Element {
                         >
                           View
                         </button>
+                        <button
+                          onClick={() => {
+                            setEditingOrder(order);
+                            setIsEditModalOpen(true);
+                          }}
+                          className="text-gray-600 hover:text-gray-900"
+                          title={order.status === 'CREATED' ? 'Edit order' : 'View details'}
+                        >
+                          <Edit className="h-4 w-4 inline" />
+                        </button>
                         {nextStatus && (
                           <button
                             onClick={() => handleStatusUpdate(order.id, nextStatus)}
@@ -327,12 +341,9 @@ export default function DashboardPage(): React.JSX.Element {
                             {nextStatus === 'DELIVERED' && 'Deliver'}
                           </button>
                         )}
-                        {(order.status === 'CREATED' ||
-                          order.status === 'CONFIRMED') && (
+                        {(order.status === 'CREATED' || order.status === 'CONFIRMED') && (
                           <button
-                            onClick={() =>
-                              handleStatusUpdate(order.id, 'CANCELLED')
-                            }
+                            onClick={() => handleStatusUpdate(order.id, 'CANCELLED')}
                             className="text-red-600 hover:text-red-900"
                           >
                             Cancel
@@ -344,10 +355,7 @@ export default function DashboardPage(): React.JSX.Element {
                 })}
                 {orders.length === 0 && (
                   <tr>
-                    <td
-                      colSpan={7}
-                      className="px-6 py-12 text-center text-gray-500"
-                    >
+                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                       No orders found
                     </td>
                   </tr>
@@ -364,9 +372,7 @@ export default function DashboardPage(): React.JSX.Element {
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">
-                  Order {selectedOrder.orderNumber}
-                </h2>
+                <h2 className="text-xl font-semibold">Order {selectedOrder.orderNumber}</h2>
                 <button
                   onClick={() => setSelectedOrder(null)}
                   className="text-gray-400 hover:text-gray-600"
@@ -377,35 +383,24 @@ export default function DashboardPage(): React.JSX.Element {
 
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">
-                    Status
-                  </h3>
-                  <span
-                    className={`status-badge ${
-                      statusConfig[selectedOrder.status].color
-                    }`}
-                  >
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Status</h3>
+                  <span className={`status-badge ${statusConfig[selectedOrder.status].color}`}>
                     {statusConfig[selectedOrder.status].label}
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">
-                    Customer
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Customer</h3>
                   <p className="text-gray-900">{selectedOrder.customerName}</p>
                   <p className="text-gray-600">{selectedOrder.customerEmail}</p>
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">
-                    Delivery Address
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Delivery Address</h3>
                   <p className="text-gray-900">
                     {selectedOrder.deliveryAddress.street}
                     <br />
-                    {selectedOrder.deliveryAddress.city},{' '}
-                    {selectedOrder.deliveryAddress.state}{' '}
+                    {selectedOrder.deliveryAddress.city}, {selectedOrder.deliveryAddress.state}{' '}
                     {selectedOrder.deliveryAddress.postalCode}
                     <br />
                     {selectedOrder.deliveryAddress.country}
@@ -413,83 +408,55 @@ export default function DashboardPage(): React.JSX.Element {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">
-                    Items
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Items</h3>
                   <div className="border rounded-md divide-y">
-                    {selectedOrder.items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="p-3 flex items-center justify-between"
-                      >
+                    {selectedOrder.items.map(item => (
+                      <div key={item.id} className="p-3 flex items-center justify-between">
                         <div>
                           <p className="font-medium">{item.productName}</p>
                           <p className="text-sm text-gray-500">
                             Qty: {item.quantity} x ${item.unitPrice.toFixed(2)}
                           </p>
                         </div>
-                        <p className="font-medium">
-                          ${item.totalPrice.toFixed(2)}
-                        </p>
+                        <p className="font-medium">${item.totalPrice.toFixed(2)}</p>
                       </div>
                     ))}
                     <div className="p-3 flex items-center justify-between bg-gray-50">
                       <p className="font-medium">Total</p>
-                      <p className="font-bold text-lg">
-                        ${selectedOrder.totalAmount.toFixed(2)}
-                      </p>
+                      <p className="font-bold text-lg">${selectedOrder.totalAmount.toFixed(2)}</p>
                     </div>
                   </div>
                 </div>
 
                 {selectedOrder.notes && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-2">
-                      Notes
-                    </h3>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">Notes</h3>
                     <p className="text-gray-900">{selectedOrder.notes}</p>
                   </div>
                 )}
 
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">
-                    Timeline
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Timeline</h3>
                   <div className="text-sm text-gray-600 space-y-1">
                     <p>Created: {new Date(selectedOrder.createdAt).toLocaleString()}</p>
                     {selectedOrder.confirmedAt && (
-                      <p>
-                        Confirmed:{' '}
-                        {new Date(selectedOrder.confirmedAt).toLocaleString()}
-                      </p>
+                      <p>Confirmed: {new Date(selectedOrder.confirmedAt).toLocaleString()}</p>
                     )}
                     {selectedOrder.dispatchedAt && (
-                      <p>
-                        Dispatched:{' '}
-                        {new Date(selectedOrder.dispatchedAt).toLocaleString()}
-                      </p>
+                      <p>Dispatched: {new Date(selectedOrder.dispatchedAt).toLocaleString()}</p>
                     )}
                     {selectedOrder.deliveredAt && (
-                      <p>
-                        Delivered:{' '}
-                        {new Date(selectedOrder.deliveredAt).toLocaleString()}
-                      </p>
+                      <p>Delivered: {new Date(selectedOrder.deliveredAt).toLocaleString()}</p>
                     )}
                     {selectedOrder.cancelledAt && (
-                      <p>
-                        Cancelled:{' '}
-                        {new Date(selectedOrder.cancelledAt).toLocaleString()}
-                      </p>
+                      <p>Cancelled: {new Date(selectedOrder.cancelledAt).toLocaleString()}</p>
                     )}
                   </div>
                 </div>
               </div>
 
               <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  onClick={() => setSelectedOrder(null)}
-                  className="btn-secondary"
-                >
+                <button onClick={() => setSelectedOrder(null)} className="btn-secondary">
                   Close
                 </button>
               </div>
@@ -497,6 +464,29 @@ export default function DashboardPage(): React.JSX.Element {
           </div>
         </div>
       )}
+
+      {/* Create Order Modal */}
+      <CreateOrderModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={() => {
+          fetchData();
+        }}
+        retailerId={(session?.user as { retailerId?: string })?.retailerId}
+      />
+
+      {/* Edit Order Modal */}
+      <EditOrderModal
+        isOpen={isEditModalOpen}
+        order={editingOrder}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingOrder(null);
+        }}
+        onSuccess={() => {
+          fetchData();
+        }}
+      />
     </div>
   );
 }

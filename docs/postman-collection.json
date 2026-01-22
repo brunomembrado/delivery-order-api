@@ -12,6 +12,18 @@
     {
       "key": "accessToken",
       "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    },
+    {
+      "key": "retailerId",
+      "value": ""
     }
   ],
   "auth": {
@@ -55,9 +67,33 @@
               "listen": "test",
               "script": {
                 "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Response contains tokens', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.tokens).to.be.an('object');",
+                  "    pm.expect(response.data.tokens.accessToken).to.be.a('string');",
+                  "    pm.expect(response.data.tokens.refreshToken).to.be.a('string');",
+                  "});",
+                  "",
+                  "pm.test('Response contains user data', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.user).to.be.an('object');",
+                  "    pm.expect(response.data.user.email).to.be.a('string');",
+                  "});",
+                  "",
                   "if (pm.response.code === 200) {",
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('accessToken', response.data.tokens.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.data.tokens.refreshToken);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -85,7 +121,33 @@
               "path": ["auth", "register"]
             },
             "description": "Register a new user"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Response contains user data', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.user).to.be.an('object');",
+                  "    pm.expect(response.data.user.id).to.be.a('string');",
+                  "    pm.expect(response.data.user.email).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Refresh Token",
@@ -107,7 +169,40 @@
               "path": ["auth", "refresh"]
             },
             "description": "Refresh access token"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Response contains new tokens', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.tokens).to.be.an('object');",
+                  "    pm.expect(response.data.tokens.accessToken).to.be.a('string');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.data.tokens.accessToken);",
+                  "    if (response.data.tokens.refreshToken) {",
+                  "        pm.collectionVariables.set('refreshToken', response.data.tokens.refreshToken);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Current User",
@@ -120,7 +215,33 @@
               "path": ["auth", "me"]
             },
             "description": "Get current authenticated user"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Response contains user information', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.id).to.be.a('string');",
+                  "    pm.expect(response.data.email).to.be.a('string');",
+                  "    pm.expect(response.data.role).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -154,6 +275,30 @@
               "listen": "test",
               "script": {
                 "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Order has required fields', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.id).to.be.a('string');",
+                  "    pm.expect(response.data.orderNumber).to.be.a('string');",
+                  "    pm.expect(response.data.status).to.equal('CREATED');",
+                  "    pm.expect(response.data.items).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Order has correct customer info', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.customerName).to.be.a('string');",
+                  "    pm.expect(response.data.deliveryAddress).to.be.an('object');",
+                  "});",
+                  "",
                   "if (pm.response.code === 201) {",
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('orderId', response.data.id);",
@@ -195,7 +340,44 @@
               ]
             },
             "description": "List all orders with optional filters"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Response has pagination info', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.pagination).to.be.an('object');",
+                  "    pm.expect(response.pagination.page).to.be.a('number');",
+                  "    pm.expect(response.pagination.limit).to.be.a('number');",
+                  "    pm.expect(response.pagination.total).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('Orders have required fields', function () {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data.length > 0) {",
+                  "        const order = response.data[0];",
+                  "        pm.expect(order.id).to.be.a('string');",
+                  "        pm.expect(order.orderNumber).to.be.a('string');",
+                  "        pm.expect(order.status).to.be.a('string');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Order by ID",
@@ -208,7 +390,35 @@
               "path": ["orders", "{{orderId}}"]
             },
             "description": "Get a specific order by ID"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Order has required fields', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.id).to.be.a('string');",
+                  "    pm.expect(response.data.orderNumber).to.be.a('string');",
+                  "    pm.expect(response.data.status).to.be.a('string');",
+                  "    pm.expect(response.data.items).to.be.an('array');",
+                  "    pm.expect(response.data.deliveryAddress).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Order by Order Number",
@@ -221,7 +431,31 @@
               "path": ["orders", "number", "ORD-SEED-001"]
             },
             "description": "Get a specific order by order number"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Order has correct order number', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.orderNumber).to.equal('ORD-SEED-001');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Order Status - Confirm",
@@ -243,7 +477,31 @@
               "path": ["orders", "{{orderId}}", "status"]
             },
             "description": "Confirm an order (CREATED -> CONFIRMED)"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Order status is CONFIRMED', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.status).to.equal('CONFIRMED');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Order Status - Dispatch",
@@ -265,7 +523,31 @@
               "path": ["orders", "{{orderId}}", "status"]
             },
             "description": "Dispatch an order (CONFIRMED -> DISPATCHED)"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Order status is DISPATCHED', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.status).to.equal('DISPATCHED');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Order Status - Deliver",
@@ -287,7 +569,31 @@
               "path": ["orders", "{{orderId}}", "status"]
             },
             "description": "Deliver an order (DISPATCHED -> DELIVERED)"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Order status is DELIVERED', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.status).to.equal('DELIVERED');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Order Status - Cancel",
@@ -309,7 +615,31 @@
               "path": ["orders", "{{orderId}}", "status"]
             },
             "description": "Cancel an order (only from CREATED or CONFIRMED)"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Order status is CANCELLED', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.status).to.equal('CANCELLED');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Add Item to Order",
@@ -331,7 +661,33 @@
               "path": ["orders", "{{orderId}}", "items"]
             },
             "description": "Add an item to an order (only in CREATED status)"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Order contains the new item', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.items).to.be.an('array');",
+                  "    const newItem = response.data.items.find(item => item.productId === 'prod-002');",
+                  "    pm.expect(newItem).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Remove Item from Order",
@@ -344,7 +700,33 @@
               "path": ["orders", "{{orderId}}", "items", "prod-002"]
             },
             "description": "Remove an item from an order (only in CREATED status)"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Item was removed from order', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.items).to.be.an('array');",
+                  "    const removedItem = response.data.items.find(item => item.productId === 'prod-002');",
+                  "    pm.expect(removedItem).to.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Order Statistics",
@@ -357,7 +739,31 @@
               "path": ["orders", "stats"]
             },
             "description": "Get order statistics by status"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Statistics contain status counts', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data).to.have.property('total');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -391,6 +797,23 @@
               "listen": "test",
               "script": {
                 "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Retailer has required fields', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.id).to.be.a('string');",
+                  "    pm.expect(response.data.name).to.be.a('string');",
+                  "    pm.expect(response.data.email).to.be.a('string');",
+                  "});",
+                  "",
                   "if (pm.response.code === 201) {",
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('retailerId', response.data.id);",
@@ -427,7 +850,51 @@
               ]
             },
             "description": "List all retailers (Admin only)"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Response has pagination info', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.pagination).to.be.an('object');",
+                  "    pm.expect(response.pagination.page).to.be.a('number');",
+                  "    pm.expect(response.pagination.limit).to.be.a('number');",
+                  "    pm.expect(response.pagination.total).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('Retailers have required fields', function () {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data.length > 0) {",
+                  "        const retailer = response.data[0];",
+                  "        pm.expect(retailer.id).to.be.a('string');",
+                  "        pm.expect(retailer.name).to.be.a('string');",
+                  "    }",
+                  "});",
+                  "",
+                  "// Save first retailer ID if available and retailerId is not set",
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data.length > 0 && !pm.collectionVariables.get('retailerId')) {",
+                  "        pm.collectionVariables.set('retailerId', response.data[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Get Retailer by ID",
@@ -440,7 +907,33 @@
               "path": ["retailers", "{{retailerId}}"]
             },
             "description": "Get a specific retailer by ID"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Retailer has required fields', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.id).to.be.a('string');",
+                  "    pm.expect(response.data.name).to.be.a('string');",
+                  "    pm.expect(response.data.email).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Update Retailer",
@@ -462,7 +955,31 @@
               "path": ["retailers", "{{retailerId}}"]
             },
             "description": "Update a retailer"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Retailer was updated', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.name).to.equal('Updated Retailer Name');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Delete Retailer",
@@ -475,7 +992,27 @@
               "path": ["retailers", "{{retailerId}}"]
             },
             "description": "Delete a retailer (Admin only)"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 204', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "pm.test('Retailer was deleted', function () {",
+                  "    if (pm.response.code === 200) {",
+                  "        const response = pm.response.json();",
+                  "        pm.expect(response.success).to.be.true;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -497,7 +1034,25 @@
               "path": ["health"]
             },
             "description": "Check API health status"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('API is healthy', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.equal('ok');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     }

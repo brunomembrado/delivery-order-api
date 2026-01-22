@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 
 import { ITokenService, TokenPayload } from '../../application/use-cases/auth/login.use-case';
 import { ITokenVerificationService } from '../../application/use-cases/auth/refresh-token.use-case';
@@ -21,13 +21,13 @@ export class JwtTokenService implements ITokenService, ITokenVerificationService
   generateAccessToken(payload: TokenPayload): string {
     return jwt.sign(payload, this.accessTokenSecret, {
       expiresIn: this.accessTokenExpiry,
-    });
+    } as SignOptions);
   }
 
   generateRefreshToken(payload: TokenPayload): string {
     return jwt.sign(payload, this.refreshTokenSecret, {
       expiresIn: this.refreshTokenExpiry,
-    });
+    } as SignOptions);
   }
 
   getAccessTokenExpiry(): number {

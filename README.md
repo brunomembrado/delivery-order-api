@@ -1,6 +1,8 @@
 # Delivery Order API
 
-A production-grade delivery order management system demonstrating enterprise software engineering practices including Clean Architecture, Domain-Driven Design, and modern DevOps workflows.
+A production-grade delivery order management system I built to demonstrate my
+understanding of enterprise software engineering practices including Clean
+Architecture, Domain-Driven Design, and modern DevOps workflows.
 
 ---
 
@@ -20,7 +22,8 @@ A production-grade delivery order management system demonstrating enterprise sof
 12. [Testing Strategy](#testing-strategy)
 13. [Development Workflow](#development-workflow)
 14. [Deployment](#deployment)
-15. [Contributing](#contributing)
+15. [Future Improvements / Roadmap](#future-improvements--roadmap)
+16. [Code Quality Standards](#code-quality-standards)
 
 ---
 
@@ -28,7 +31,9 @@ A production-grade delivery order management system demonstrating enterprise sof
 
 ### What Is This?
 
-This is a **delivery order management system** that allows retailers to create, track, and manage delivery orders through their lifecycle. The system consists of:
+This is a **delivery order management system** that allows retailers to create,
+track, and manage delivery orders through their lifecycle. The system consists
+of:
 
 - **Backend API**: A RESTful service built with Node.js/Express
 - **Frontend Portal**: A Next.js web application for order management
@@ -45,13 +50,15 @@ Customer places order → Retailer confirms → Dispatch for delivery → Mark d
 ```
 
 **Key Entities:**
+
 - **Orders**: The core business object with items, addresses, and status
 - **Retailers**: Businesses that fulfill orders
 - **Users**: System users with role-based access (Admin or Retailer)
 
-### Why Was This Built?
+### Why I Built This
 
-This project demonstrates how to build a **production-ready** application that:
+I built this project to demonstrate how to create a **production-ready**
+application that:
 
 1. **Scales** - Clean separation allows independent scaling of services
 2. **Maintains** - Clear boundaries make the codebase navigable and changeable
@@ -64,7 +71,8 @@ This project demonstrates how to build a **production-ready** application that:
 
 ### Clean Architecture
 
-We chose **Clean Architecture** (also known as Hexagonal/Ports & Adapters) because:
+I chose **Clean Architecture** (also known as Hexagonal/Ports & Adapters)
+because:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -86,7 +94,8 @@ We chose **Clean Architecture** (also known as Hexagonal/Ports & Adapters) becau
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**The Dependency Rule**: Dependencies only point inward. The Domain layer knows nothing about databases, HTTP, or frameworks. This means:
+**The Dependency Rule**: Dependencies only point inward. The Domain layer knows
+nothing about databases, HTTP, or frameworks. This means:
 
 - **Testability**: Test business logic without spinning up databases
 - **Flexibility**: Swap PostgreSQL for MongoDB without touching business code
@@ -94,7 +103,8 @@ We chose **Clean Architecture** (also known as Hexagonal/Ports & Adapters) becau
 
 ### Why Not a Simpler Architecture?
 
-For a small CRUD app, this would be overkill. But this project demonstrates patterns needed when:
+For a small CRUD app, this would be overkill. But this project demonstrates
+patterns needed when:
 
 - Multiple developers work on the codebase
 - Business rules are complex and change frequently
@@ -109,13 +119,13 @@ Before starting, ensure you have the following installed and running:
 
 ### Required Software
 
-| Software | Version | Purpose | Installation |
-|----------|---------|---------|--------------|
-| **Node.js** | 24.x | JavaScript runtime | [nodejs.org](https://nodejs.org/) or use `nvm` |
-| **npm** | 10.x+ | Package manager | Comes with Node.js |
-| **Docker** | 20.x+ | Container runtime | [docker.com](https://www.docker.com/get-started) |
-| **Docker Compose** | 2.x+ | Multi-container orchestration | Included with Docker Desktop |
-| **Git** | 2.x+ | Version control | [git-scm.com](https://git-scm.com/) |
+| Software           | Version | Purpose                       | Installation                                     |
+| ------------------ | ------- | ----------------------------- | ------------------------------------------------ |
+| **Node.js**        | 24.x    | JavaScript runtime            | [nodejs.org](https://nodejs.org/) or use `nvm`   |
+| **npm**            | 10.x+   | Package manager               | Comes with Node.js                               |
+| **Docker**         | 20.x+   | Container runtime             | [docker.com](https://www.docker.com/get-started) |
+| **Docker Compose** | 2.x+    | Multi-container orchestration | Included with Docker Desktop                     |
+| **Git**            | 2.x+    | Version control               | [git-scm.com](https://git-scm.com/)              |
 
 ### Verify Installation
 
@@ -136,7 +146,8 @@ git --version
 
 ### Node.js Version Management
 
-We use `.nvmrc` files to ensure consistent Node.js versions across all environments:
+I use `.nvmrc` files to ensure consistent Node.js versions across all
+environments:
 
 ```bash
 # If you have nvm installed, simply run:
@@ -148,6 +159,7 @@ node --version  # Should output v24.x.x
 ```
 
 **Why Node.js 24?** It's the current LTS version with:
+
 - Native ES modules support
 - Improved performance
 - Latest security patches
@@ -181,11 +193,12 @@ node --version
 
 ```bash
 # Install all workspace dependencies
-# We use npm ci for reproducible builds (uses package-lock.json exactly)
+# I use npm ci for reproducible builds (uses package-lock.json exactly)
 npm ci
 ```
 
 **Why `npm ci` instead of `npm install`?**
+
 - `npm ci` is faster and more reliable
 - It uses exact versions from `package-lock.json`
 - It removes `node_modules` first, ensuring clean state
@@ -202,6 +215,7 @@ docker compose ps
 ```
 
 This starts:
+
 - **PostgreSQL** on port `5432` - The database
 - **pgAdmin** on port `5050` - Database management UI (optional)
 
@@ -211,10 +225,12 @@ This starts:
 # Copy example environment files
 cp .env.example .env
 cp services/order-service/.env.example services/order-service/.env
-cp web-portal/.env.example web-portal/.env.local
+cp frontend-preview/.env.example frontend-preview/.env.local
 ```
 
-The default values work for local development. For production, you **must** change:
+The default values work for local development. For production, you **must**
+change:
+
 - `JWT_SECRET` - Use a strong random string
 - `NEXTAUTH_SECRET` - Use a strong random string
 - `DATABASE_URL` - Point to your production database
@@ -248,22 +264,22 @@ npm run dev:web
 
 ### Step 8: Verify Everything Works
 
-| Service | URL | Expected Result |
-|---------|-----|-----------------|
-| Frontend | http://localhost:3000 | Login page |
-| Backend API | http://localhost:3001/api/v1/health | `{"status":"ok"}` |
-| Swagger Docs | http://localhost:3001/api/docs | Interactive API documentation |
-| pgAdmin | http://localhost:5050 | Database management UI |
+| Service      | URL                                 | Expected Result               |
+| ------------ | ----------------------------------- | ----------------------------- |
+| Frontend     | http://localhost:3000               | Login page                    |
+| Backend API  | http://localhost:3001/api/v1/health | `{"status":"ok"}`             |
+| Swagger Docs | http://localhost:3001/api/docs      | Interactive API documentation |
+| pgAdmin      | http://localhost:5050               | Database management UI        |
 
 ### Test Accounts
 
 Use these credentials to log in:
 
-| Role | Email | Password | Access Level |
-|------|-------|----------|--------------|
-| Admin | admin@delivery.local | Admin123! | Full system access |
-| Retailer | user@techmart.com | Retailer123! | Own retailer's orders only |
-| Retailer | user@fashionhub.com | Retailer123! | Own retailer's orders only |
+| Role     | Email                | Password     | Access Level               |
+| -------- | -------------------- | ------------ | -------------------------- |
+| Admin    | admin@delivery.local | Admin123!    | Full system access         |
+| Retailer | user@techmart.com    | Retailer123! | Own retailer's orders only |
+| Retailer | user@fashionhub.com  | Retailer123! | Own retailer's orders only |
 
 ---
 
@@ -285,7 +301,7 @@ delivery-order-api/
 │       ├── .nvmrc                 # Node.js version (24)
 │       └── package.json
 │
-├── web-portal/                    # Frontend (Next.js 16 / React 19)
+├── frontend-preview/                    # Frontend (Next.js 16 / React 19)
 │   └── src/
 │       ├── app/                   # Next.js App Router pages
 │       ├── components/            # Reusable React components
@@ -313,7 +329,8 @@ delivery-order-api/
 
 ### Why This Structure?
 
-**Monorepo with Workspaces**: We use npm workspaces to manage multiple packages in one repository:
+**Monorepo with Workspaces**: I use npm workspaces to manage multiple packages
+in one repository:
 
 - **Shared code**: Common utilities are shared without publishing to npm
 - **Atomic changes**: Frontend and backend changes can be in one commit
@@ -324,7 +341,7 @@ delivery-order-api/
 
 - They have different deployment targets
 - They can scale independently
-- Teams can work on them in parallel
+- They could be worked on in parallel by different teams
 - Different testing strategies apply
 
 ---
@@ -333,7 +350,8 @@ delivery-order-api/
 
 ### Domain Layer (`services/order-service/src/domain/`)
 
-The **heart of the application**. Contains pure business logic with zero dependencies on frameworks or databases.
+The **heart of the application**. Contains pure business logic with zero
+dependencies on frameworks or databases.
 
 ```typescript
 // Example: Order Entity
@@ -354,24 +372,26 @@ class Order {
 }
 ```
 
-**Why?** Business rules like "orders need items to be confirmed" live here. If the rule changes, there's exactly one place to update it.
+**Why?** Business rules like "orders need items to be confirmed" live here. If
+the rule changes, there's exactly one place to update it.
 
 ### Application Layer (`services/order-service/src/application/`)
 
-**Orchestrates use cases** by coordinating domain objects and infrastructure services.
+**Orchestrates use cases** by coordinating domain objects and infrastructure
+services.
 
 ```typescript
 // Example: Update Order Status Use Case
 class UpdateOrderStatusUseCase {
   constructor(
-    private orderRepository: IOrderRepository,  // Interface, not implementation
+    private orderRepository: IOrderRepository, // Interface, not implementation
     private eventEmitter: IEventEmitter
   ) {}
 
   async execute(input: UpdateOrderStatusDTO): Promise<Order> {
     const order = await this.orderRepository.findById(input.orderId);
 
-    order.transitionTo(input.newStatus);  // Domain logic
+    order.transitionTo(input.newStatus); // Domain logic
 
     await this.orderRepository.save(order);
     await this.eventEmitter.emit('order.status.changed', order);
@@ -381,11 +401,13 @@ class UpdateOrderStatusUseCase {
 }
 ```
 
-**Why?** Use cases are the API of your business logic. They're easy to test and reuse (same use case can be triggered by HTTP, CLI, or message queue).
+**Why?** Use cases are the API of your business logic. They're easy to test and
+reuse (same use case can be triggered by HTTP, CLI, or message queue).
 
 ### Infrastructure Layer (`services/order-service/src/infrastructure/`)
 
-**Implements interfaces** defined by inner layers. Contains all the "dirty" details.
+**Implements interfaces** defined by inner layers. Contains all the "dirty"
+details.
 
 ```typescript
 // Example: Prisma Repository Implementation
@@ -395,24 +417,26 @@ class PrismaOrderRepository implements IOrderRepository {
   async findById(id: string): Promise<Order | null> {
     const data = await this.prisma.order.findUnique({
       where: { id },
-      include: { items: true }
+      include: { items: true },
     });
-    return data ? this.toDomain(data) : null;  // Map to domain entity
+    return data ? this.toDomain(data) : null; // Map to domain entity
   }
 }
 ```
 
-**Why?** If we need to switch from Prisma to TypeORM, we only change this layer. The domain and application layers don't care.
+**Why?** If I need to switch from Prisma to TypeORM, I only change this layer.
+The domain and application layers don't care.
 
 ### Presentation Layer (`services/order-service/src/presentation/`)
 
-**Handles HTTP concerns**: routing, request parsing, response formatting, authentication.
+**Handles HTTP concerns**: routing, request parsing, response formatting,
+authentication.
 
 ```typescript
 // Example: Controller
 class OrderController {
   async updateStatus(req: Request, res: Response) {
-    const dto = UpdateOrderStatusDTO.parse(req.body);  // Validation
+    const dto = UpdateOrderStatusDTO.parse(req.body); // Validation
 
     const order = await this.updateStatusUseCase.execute(dto);
 
@@ -421,7 +445,8 @@ class OrderController {
 }
 ```
 
-**Why?** Controllers are thin. They translate HTTP to use case calls and back. All business logic lives in inner layers.
+**Why?** Controllers are thin. They translate HTTP to use case calls and back.
+All business logic lives in inner layers.
 
 ---
 
@@ -432,12 +457,15 @@ class OrderController {
 **What**: All API endpoints are prefixed with `/api/v1/`.
 
 **Why**:
-- **Breaking changes**: When we need incompatible changes, we create `/api/v2/` while keeping v1 running
+
+- **Breaking changes**: When incompatible changes are needed, I can create
+  `/api/v2/` while keeping v1 running
 - **Client compatibility**: Mobile apps can't force users to update immediately
 - **Gradual migration**: Clients migrate at their own pace
 - **Clear contracts**: Version indicates the API contract
 
 **Implementation**:
+
 ```
 /api/v1/orders      ← Current version
 /api/v2/orders      ← Future breaking changes
@@ -448,30 +476,34 @@ class OrderController {
 **What**: Stateless authentication using JSON Web Tokens.
 
 **Why**:
+
 - **Scalability**: No session storage needed on the server
 - **Microservices ready**: Any service can validate the token
 - **Mobile friendly**: Works well with mobile apps and SPAs
 - **Self-contained**: Token carries user info (id, role, retailerId)
 
 **Trade-offs**:
-- Cannot invalidate tokens immediately (we use short expiry + refresh tokens)
+
+- Cannot invalidate tokens immediately (I use short expiry + refresh tokens)
 - Token size larger than session ID
 
 ### Decision 3: Role-Based Access Control (RBAC)
 
 **What**: Two roles with different permissions.
 
-| Role | Permissions |
-|------|-------------|
-| ADMIN | Full access to all resources |
+| Role     | Permissions                          |
+| -------- | ------------------------------------ |
+| ADMIN    | Full access to all resources         |
 | RETAILER | Access only to own retailer's orders |
 
 **Why**:
+
 - **Simplicity**: Two roles cover current business needs
 - **Security**: Principle of least privilege
 - **Multi-tenancy**: Retailers see only their data
 
 **Implementation**: Middleware checks role and filters queries:
+
 ```typescript
 // Retailer can only see their orders
 if (user.role === 'RETAILER') {
@@ -490,6 +522,7 @@ CREATED ──→ CONFIRMED ──→ DISPATCHED ──→ DELIVERED
 ```
 
 **Why**:
+
 - **Data integrity**: Invalid transitions are impossible
 - **Business rules**: "Can't cancel after dispatch" is enforced
 - **Audit trail**: Timestamps record when each transition happened
@@ -500,6 +533,7 @@ CREATED ──→ CONFIRMED ──→ DISPATCHED ──→ DELIVERED
 **What**: Auto-generated API documentation at `/api/docs`.
 
 **Why**:
+
 - **Single source of truth**: Docs generated from code annotations
 - **Interactive testing**: Try API calls directly in browser
 - **Client generation**: Can generate SDKs from OpenAPI spec
@@ -510,6 +544,7 @@ CREATED ──→ CONFIRMED ──→ DISPATCHED ──→ DELIVERED
 **What**: Both backend and frontend use TypeScript.
 
 **Why**:
+
 - **Type safety**: Catch errors at compile time, not runtime
 - **Refactoring confidence**: IDE can safely rename across codebase
 - **Documentation**: Types are documentation that can't go stale
@@ -520,12 +555,14 @@ CREATED ──→ CONFIRMED ──→ DISPATCHED ──→ DELIVERED
 **What**: All code in one repository using npm workspaces.
 
 **Why**:
+
 - **Atomic commits**: Change API and frontend together
 - **Shared tooling**: One ESLint, Prettier, TypeScript config
 - **Simplified CI**: One pipeline tests everything
 - **Code sharing**: `shared/` package used by both services
 
 **Trade-offs**:
+
 - Repository grows larger over time
 - CI must be smart about running only affected tests
 
@@ -534,6 +571,7 @@ CREATED ──→ CONFIRMED ──→ DISPATCHED ──→ DELIVERED
 **What**: Using Prisma for database access.
 
 **Why**:
+
 - **Type safety**: Generated types match database schema
 - **Migrations**: Version-controlled schema changes
 - **Developer experience**: Excellent autocompletion
@@ -544,6 +582,7 @@ CREATED ──→ CONFIRMED ──→ DISPATCHED ──→ DELIVERED
 **What**: Frontend uses Next.js 16 with the App Router.
 
 **Why**:
+
 - **React Server Components**: Better performance, smaller bundles
 - **Streaming**: Progressive page loading
 - **Layouts**: Nested layouts with shared state
@@ -555,6 +594,7 @@ CREATED ──→ CONFIRMED ──→ DISPATCHED ──→ DELIVERED
 **What**: All services use Node.js 24, enforced via `.nvmrc` files and Docker.
 
 **Why**:
+
 - **Reproducibility**: Same version in development and production
 - **No surprises**: Avoid "works on my machine" issues
 - **Latest features**: ES modules, performance improvements
@@ -566,18 +606,19 @@ CREATED ──→ CONFIRMED ──→ DISPATCHED ──→ DELIVERED
 
 ### RESTful Principles
 
-Our API follows REST conventions:
+The API follows REST conventions:
 
-| Principle | Implementation |
-|-----------|----------------|
-| **Resources** | Nouns in URLs: `/orders`, `/retailers` |
-| **HTTP Methods** | `GET` read, `POST` create, `PATCH` update, `DELETE` remove |
+| Principle        | Implementation                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------ |
+| **Resources**    | Nouns in URLs: `/orders`, `/retailers`                                               |
+| **HTTP Methods** | `GET` read, `POST` create, `PATCH` update, `DELETE` remove                           |
 | **Status Codes** | `200` success, `201` created, `400` bad request, `401` unauthorized, `404` not found |
-| **JSON** | All requests/responses use JSON |
+| **JSON**         | All requests/responses use JSON                                                      |
 
 ### Endpoint Overview
 
 #### Authentication
+
 ```
 POST   /api/v1/auth/login      # Get tokens
 POST   /api/v1/auth/register   # Create account
@@ -586,6 +627,7 @@ GET    /api/v1/auth/me         # Get current user
 ```
 
 #### Orders
+
 ```
 GET    /api/v1/orders                           # List orders (paginated, filterable)
 POST   /api/v1/orders                           # Create order
@@ -598,6 +640,7 @@ GET    /api/v1/orders/stats                     # Order statistics
 ```
 
 #### Retailers
+
 ```
 GET    /api/v1/retailers       # List retailers
 POST   /api/v1/retailers       # Create retailer
@@ -635,6 +678,7 @@ All responses follow a consistent structure:
 ```
 
 **Why consistent responses?**
+
 - Frontend knows exactly what to expect
 - Error handling is standardized
 - Pagination is predictable
@@ -664,6 +708,7 @@ All responses follow a consistent structure:
 ### Token Structure
 
 The JWT contains:
+
 ```json
 {
   "sub": "user-id",
@@ -729,14 +774,14 @@ Response:
 
 ### Technology Stack
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| Next.js | 16.1 | React framework with App Router |
-| React | 19.0 | UI library with concurrent features |
-| Auth.js | 5.0 | Authentication (NextAuth v5) |
-| TypeScript | 5.7 | Type safety |
-| Tailwind CSS | 3.4 | Utility-first styling |
-| Turbopack | Built-in | Fast development bundling |
+| Technology   | Version  | Purpose                             |
+| ------------ | -------- | ----------------------------------- |
+| Next.js      | 16.1     | React framework with App Router     |
+| React        | 19.0     | UI library with concurrent features |
+| Auth.js      | 5.0      | Authentication (NextAuth v5)        |
+| TypeScript   | 5.7      | Type safety                         |
+| Tailwind CSS | 3.4      | Utility-first styling               |
+| Turbopack    | Built-in | Fast development bundling           |
 
 ### Why Next.js 16?
 
@@ -836,7 +881,8 @@ If any check fails, the commit is blocked.
 
 ### Docker Deployment
 
-All services use **Node.js 24 Alpine** images for consistency and small image size.
+All services use **Node.js 24 Alpine** images for consistency and small image
+size.
 
 ```bash
 # Build and start production containers
@@ -851,12 +897,15 @@ docker compose -f docker-compose.prod.yml down
 
 ### Docker Services
 
-| Service | Image | Port | Description |
-|---------|-------|------|-------------|
-| postgres | postgres:15-alpine | 5432 | PostgreSQL database |
-| order-service | node:24-alpine | 3001 | Backend API |
-| web-portal | node:24-alpine | 3000 | Next.js frontend |
-| pgadmin | dpage/pgadmin4 | 5050 | Database admin (optional) |
+| Service       | Image              | Port | Description               |
+| ------------- | ------------------ | ---- | ------------------------- |
+| postgres      | postgres:15-alpine | 5432 | PostgreSQL database       |
+| order-service | node:24-alpine     | 3001 | Backend API               |
+| pgadmin       | dpage/pgadmin4     | 5050 | Database admin (optional) |
+
+**Note**: The Next.js frontend runs locally (`npm run dev:web`) or can be
+deployed separately to platforms like Vercel. This separation of concerns allows
+the frontend and backend to be deployed and scaled independently.
 
 ### Production Checklist
 
@@ -871,31 +920,277 @@ docker compose -f docker-compose.prod.yml down
 
 ### Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `JWT_SECRET` | Yes | Secret for signing JWTs |
-| `JWT_EXPIRES_IN` | No | Token expiry (default: "24h") |
-| `NEXTAUTH_SECRET` | Yes | Auth.js secret |
-| `NEXTAUTH_URL` | Yes | Frontend URL |
-| `NEXT_PUBLIC_API_URL` | Yes | Backend API URL |
+| Variable              | Required | Description                   |
+| --------------------- | -------- | ----------------------------- |
+| `DATABASE_URL`        | Yes      | PostgreSQL connection string  |
+| `JWT_SECRET`          | Yes      | Secret for signing JWTs       |
+| `JWT_EXPIRES_IN`      | No       | Token expiry (default: "24h") |
+| `NEXTAUTH_SECRET`     | Yes      | Auth.js secret                |
+| `NEXTAUTH_URL`        | Yes      | Frontend URL                  |
+| `NEXT_PUBLIC_API_URL` | Yes      | Backend API URL               |
 
 ---
 
-## Contributing
+## Future Improvements / Roadmap
 
-### Getting Started
+The following features were planned but not yet implemented due to time
+constraints. These represent the next steps I would take for production-ready
+cloud deployment.
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Make your changes
-4. Run validation: `npm run validate`
-5. Commit with a descriptive message
-6. Push and create a Pull Request
+### CI/CD Pipeline with GitHub Actions
+
+**Goal**: Automate the build, test, and deployment process using GitHub Actions.
+
+**Planned Workflow** (`.github/workflows/deploy.yml`):
+
+```yaml
+name: Build and Deploy to AWS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY_API: delivery-order-api
+  ECS_CLUSTER: delivery-cluster
+  ECS_SERVICE_API: order-service
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run validate
+      - run: npm test
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Order Service image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG -f services/order-service/Dockerfile .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_API:latest -f services/order-service/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_API:latest
+
+  # Note: Frontend (Next.js) would be deployed separately to Vercel
+  # Vercel automatically deploys on push to main when connected to the repo
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE_API --force-new-deployment
+```
+
+### AWS Infrastructure with Fargate Auto-Scaling
+
+**Goal**: Deploy the backend API to AWS ECS Fargate with automatic scaling. The
+frontend would be deployed separately to Vercel (optimized for Next.js).
+
+**Planned Architecture**:
+
+```
+┌──────────┐       ┌─────────────────────────────────────────────────┐
+│  Users   │       │                  Vercel                         │
+│          │──────▶│            Next.js Frontend                     │
+└──────────┘       │         (Auto-scaled globally)                  │
+     │             └─────────────────────┬───────────────────────────┘
+     │                                   │ API calls
+     │                                   ▼
+     │             ┌─────────────────────────────────────────────────┐
+     │             │                    AWS Cloud                     │
+     │             │  ┌─────────────────────────────────────────────┐ │
+     │             │  │         Application Load Balancer            │ │
+     └─────────────│──│              :443/api/*                      │ │
+                   │  └──────────────────┬──────────────────────────┘ │
+                   │                     │                            │
+                   │  ┌──────────────────▼──────────────────┐        │
+                   │  │          ECS Fargate                │        │
+                   │  │          Order Service              │        │
+                   │  │   ┌────┐ ┌────┐ ┌────┐ ┌────┐      │        │
+                   │  │   │Task│ │Task│ │Task│ │Task│ ...  │        │
+                   │  │   └────┘ └────┘ └────┘ └────┘      │        │
+                   │  │        Auto-scaling: Min 2, Max 10  │        │
+                   │  └──────────────────┬──────────────────┘        │
+                   │                     │                            │
+                   │  ┌──────────────────▼──────────────────┐        │
+                   │  │           Amazon RDS                │        │
+                   │  │      PostgreSQL (Multi-AZ)          │        │
+                   │  └─────────────────────────────────────┘        │
+                   └─────────────────────────────────────────────────┘
+```
+
+**Why separate deployments?**
+
+- **Frontend on Vercel**: Optimized for Next.js, global CDN, automatic previews,
+  zero-config
+- **Backend on AWS**: Full control, auto-scaling, private networking with
+  database
+
+**Planned Terraform Configuration** (`infrastructure/main.tf`):
+
+```hcl
+# ECS Cluster
+resource "aws_ecs_cluster" "main" {
+  name = "delivery-cluster"
+
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+}
+
+# ECS Service with Fargate
+resource "aws_ecs_service" "order_service" {
+  name            = "order-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.order_service.arn
+  desired_count   = 2
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = aws_subnet.private[*].id
+    security_groups  = [aws_security_group.ecs_tasks.id]
+    assign_public_ip = false
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.order_service.arn
+    container_name   = "order-service"
+    container_port   = 3001
+  }
+}
+
+# Auto-scaling for Order Service
+resource "aws_appautoscaling_target" "order_service" {
+  max_capacity       = 10
+  min_capacity       = 2
+  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.order_service.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "order_service_cpu" {
+  name               = "order-service-cpu-scaling"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.order_service.resource_id
+  scalable_dimension = aws_appautoscaling_target.order_service.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.order_service.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    target_value       = 70.0
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 60
+  }
+}
+
+resource "aws_appautoscaling_policy" "order_service_memory" {
+  name               = "order-service-memory-scaling"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.order_service.resource_id
+  scalable_dimension = aws_appautoscaling_target.order_service.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.order_service.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+    }
+    target_value       = 80.0
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 60
+  }
+}
+```
+
+**Required AWS Resources**:
+
+| Resource                      | Purpose                                              |
+| ----------------------------- | ---------------------------------------------------- |
+| **ECR Repository**            | Store Docker image for order-service                 |
+| **ECS Cluster**               | Container orchestration with Fargate                 |
+| **Application Load Balancer** | Route traffic to API, SSL termination                |
+| **RDS PostgreSQL**            | Managed database with Multi-AZ for high availability |
+| **VPC with Private Subnets**  | Network isolation for security                       |
+| **Secrets Manager**           | Store sensitive environment variables                |
+| **CloudWatch**                | Logging, monitoring, and alerting                    |
+
+**GitHub Secrets Required**:
+
+| Secret                  | Description                                  |
+| ----------------------- | -------------------------------------------- |
+| `AWS_ACCESS_KEY_ID`     | IAM user access key with ECR/ECS permissions |
+| `AWS_SECRET_ACCESS_KEY` | IAM user secret key                          |
+| `DATABASE_URL`          | Production database connection string        |
+| `JWT_SECRET`            | Production JWT signing secret                |
+| `NEXTAUTH_SECRET`       | Production Auth.js secret                    |
+
+### Additional Planned Improvements
+
+**Backend (AWS):**
+
+- [ ] **GitHub Actions CI/CD**: Automated build, test, and deploy pipeline
+- [ ] **AWS ECR**: Container registry for Docker images
+- [ ] **AWS ECS Fargate**: Serverless container deployment with auto-scaling
+- [ ] **AWS RDS**: Managed PostgreSQL with automated backups
+- [ ] **AWS Secrets Manager**: Secure storage for environment variables
+- [ ] **CloudWatch Alarms**: Monitoring and alerting for service health
+- [ ] **AWS WAF**: Web Application Firewall for API protection
+- [ ] **Route 53**: DNS management and health checks
+- [ ] **ACM**: SSL/TLS certificates for HTTPS
+
+**Frontend (Vercel):**
+
+- [ ] **Vercel Deployment**: Connect repo for automatic deployments
+- [ ] **Preview Deployments**: Automatic previews for pull requests
+- [ ] **Edge Functions**: API routes at the edge for low latency
+- [ ] **Analytics**: Built-in performance monitoring
+
+---
+
+## Code Quality Standards
 
 ### Commit Message Convention
 
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
+I follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
 feat: add order cancellation endpoint
@@ -906,19 +1201,21 @@ test: add order entity unit tests
 chore: update dependencies
 ```
 
-### Code Review Checklist
+### Quality Checklist
 
-- [ ] TypeScript types are properly defined
-- [ ] Unit tests cover new functionality
-- [ ] No ESLint warnings or errors
-- [ ] Code is formatted with Prettier
-- [ ] Documentation is updated if needed
+- [x] TypeScript types are properly defined
+- [x] Unit tests cover core functionality
+- [x] No ESLint warnings or errors
+- [x] Code is formatted with Prettier
+- [x] API documentation is complete (Swagger)
 
 ---
 
-## License
+## Contact
 
-This project is licensed under the MIT License.
+This project was built by me as a demonstration of my software engineering
+skills. Feel free to reach out if you have any questions about the
+implementation or architecture decisions.
 
 ---
 

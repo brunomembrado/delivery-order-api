@@ -1,6 +1,7 @@
 # Delivery Order Portal - Web Application
 
-A modern web portal for managing delivery orders built with Next.js 16, React 19, and Auth.js v5.
+A modern web portal for managing delivery orders built with Next.js 16, React
+19, and Auth.js v5.
 
 ## Table of Contents
 
@@ -17,7 +18,9 @@ A modern web portal for managing delivery orders built with Next.js 16, React 19
 
 ## Overview
 
-The Delivery Order Portal provides a user-friendly interface for retailers and administrators to manage delivery orders. It connects to the Delivery Order API backend and provides real-time order tracking, status management, and analytics.
+The Delivery Order Portal provides a user-friendly interface for retailers and
+administrators to manage delivery orders. It connects to the Delivery Order API
+backend and provides real-time order tracking, status management, and analytics.
 
 ## Features
 
@@ -25,21 +28,22 @@ The Delivery Order Portal provides a user-friendly interface for retailers and a
 - **Dashboard**: Overview of order statistics by status
 - **Order Management**: View, filter, and update order statuses
 - **Status Workflow**: CREATED → CONFIRMED → DISPATCHED → DELIVERED
-- **Order Details**: Comprehensive view of order information including items, addresses, and timeline
+- **Order Details**: Comprehensive view of order information including items,
+  addresses, and timeline
 - **Responsive Design**: Works on desktop and mobile devices
 - **Real-time Updates**: Refresh data with a single click
 
 ## Tech Stack
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| [Next.js](https://nextjs.org/) | 16.1 | React framework with App Router |
-| [React](https://react.dev/) | 19.0 | UI library |
-| [Auth.js](https://authjs.dev/) | 5.0 | Authentication |
-| [TypeScript](https://www.typescriptlang.org/) | 5.7 | Type safety |
-| [Tailwind CSS](https://tailwindcss.com/) | 3.4 | Styling |
-| [Lucide React](https://lucide.dev/) | 0.469 | Icons |
-| [Turbopack](https://turbo.build/pack) | Built-in | Fast bundler |
+| Technology                                    | Version  | Purpose                         |
+| --------------------------------------------- | -------- | ------------------------------- |
+| [Next.js](https://nextjs.org/)                | 16.1     | React framework with App Router |
+| [React](https://react.dev/)                   | 19.0     | UI library                      |
+| [Auth.js](https://authjs.dev/)                | 5.0      | Authentication                  |
+| [TypeScript](https://www.typescriptlang.org/) | 5.7      | Type safety                     |
+| [Tailwind CSS](https://tailwindcss.com/)      | 3.4      | Styling                         |
+| [Lucide React](https://lucide.dev/)           | 0.469    | Icons                           |
+| [Turbopack](https://turbo.build/pack)         | Built-in | Fast bundler                    |
 
 ## Getting Started
 
@@ -52,16 +56,19 @@ The Delivery Order Portal provides a user-friendly interface for retailers and a
 ### Installation
 
 1. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 2. **Set up environment variables**:
+
    ```bash
    cp .env.example .env.local
    ```
 
 3. **Configure environment**:
+
    ```env
    # API Configuration
    NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
@@ -72,6 +79,7 @@ The Delivery Order Portal provides a user-friendly interface for retailers and a
    ```
 
 4. **Start the development server**:
+
    ```bash
    npm run dev
    ```
@@ -82,15 +90,15 @@ The Delivery Order Portal provides a user-friendly interface for retailers and a
 
 For development, use these test credentials:
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@delivery.local | Admin123! |
-| Retailer | user@techmart.com | Retailer123! |
+| Role     | Email                | Password     |
+| -------- | -------------------- | ------------ |
+| Admin    | admin@delivery.local | Admin123!    |
+| Retailer | user@techmart.com    | Retailer123! |
 
 ## Project Structure
 
 ```
-web-portal/
+frontend-preview/
 ├── src/
 │   ├── app/                    # Next.js App Router pages
 │   │   ├── api/
@@ -124,15 +132,16 @@ web-portal/
 
 ### Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NEXT_PUBLIC_API_URL` | Yes | Backend API base URL |
-| `NEXTAUTH_SECRET` | Yes | Secret for signing tokens |
-| `NEXTAUTH_URL` | Yes | Application URL |
+| Variable              | Required | Description               |
+| --------------------- | -------- | ------------------------- |
+| `NEXT_PUBLIC_API_URL` | Yes      | Backend API base URL      |
+| `NEXTAUTH_SECRET`     | Yes      | Secret for signing tokens |
+| `NEXTAUTH_URL`        | Yes      | Application URL           |
 
 ### Next.js Configuration
 
 The application uses Next.js 16 with the following features:
+
 - **Turbopack**: Enabled by default for fast development builds
 - **App Router**: Modern routing with React Server Components
 - **React Strict Mode**: Enabled for better development experience
@@ -166,13 +175,15 @@ interface Session {
 
 ### Protected Routes
 
-All routes except `/login` require authentication. Unauthenticated users are automatically redirected to the login page.
+All routes except `/login` require authentication. Unauthenticated users are
+automatically redirected to the login page.
 
 ## API Integration
 
 ### API Client
 
-The `ApiClient` class (`src/lib/api.ts`) provides typed methods for all API endpoints:
+The `ApiClient` class (`src/lib/api.ts`) provides typed methods for all API
+endpoints:
 
 ```typescript
 import { api } from '@/lib/api';
@@ -190,11 +201,13 @@ await api.updateOrderStatus(orderId, 'CONFIRMED');
 ### Available Methods
 
 #### Authentication
+
 - `login(email, password)` - Authenticate user
 - `register(data)` - Register new user
 - `refreshToken(token)` - Refresh access token
 
 #### Orders
+
 - `getOrders(params?)` - List orders with optional filters
 - `getOrder(id)` - Get single order
 - `createOrder(data)` - Create new order
@@ -204,6 +217,7 @@ await api.updateOrderStatus(orderId, 'CONFIRMED');
 - `getOrderStats()` - Get order statistics
 
 #### Retailers
+
 - `getRetailers(params?)` - List retailers
 - `getRetailer(id)` - Get single retailer
 - `createRetailer(data)` - Create new retailer
@@ -273,30 +287,21 @@ async newMethod(param: string): Promise<ApiResponse<Data>> {
 npm run build
 ```
 
-### Docker
+### Vercel (Recommended)
 
-```dockerfile
-FROM node:24-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
+The easiest way to deploy this Next.js app is with [Vercel](https://vercel.com):
 
-FROM node:24-alpine AS runner
-WORKDIR /app
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
+1. Push your code to GitHub
+2. Import the repository in Vercel
+3. Set the root directory to `frontend-preview`
+4. Configure environment variables:
+   - `NEXT_PUBLIC_API_URL` - Your backend API URL
+   - `NEXTAUTH_SECRET` - Generate a secure secret
+   - `NEXTAUTH_URL` - Your Vercel deployment URL
 
-ENV NODE_ENV=production
-EXPOSE 3000
-CMD ["node", "server.js"]
-```
+Vercel will automatically deploy on every push to main.
 
 ### Environment Variables for Production
-
-Ensure all required environment variables are set in your production environment:
 
 ```bash
 NEXT_PUBLIC_API_URL=https://api.yourapp.com/api/v1

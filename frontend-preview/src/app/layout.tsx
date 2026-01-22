@@ -46,9 +46,7 @@ interface RootLayoutProps {
  * </RootLayout>
  * ```
  */
-export default function RootLayout({
-  children,
-}: RootLayoutProps): React.JSX.Element {
+export default function RootLayout({ children }: RootLayoutProps): React.JSX.Element {
   return (
     <html lang="en">
       <body>

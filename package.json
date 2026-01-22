@@ -6,16 +6,16 @@
   "workspaces": [
     "services/*",
     "shared",
-    "web-portal"
+    "frontend-preview"
   ],
   "scripts": {
     "dev": "npm run docker:up && npm run dev:setup && npm run dev:all",
     "dev:setup": "wait-on tcp:5432 && npm run db:push && npm run db:seed",
     "dev:all": "concurrently -n backend,frontend -c blue,green \"npm run dev:order-service\" \"wait-on http-get://localhost:3001/api/v1/health && npm run dev:web\"",
     "dev:order-service": "npm run dev -w services/order-service",
-    "dev:web": "npm run dev -w web-portal",
+    "dev:web": "npm run dev -w frontend-preview",
     "build:order-service": "npm run build -w services/order-service",
-    "build:web": "npm run build -w web-portal",
+    "build:web": "npm run build -w frontend-preview",
     "test": "npm run test -w services/order-service",
     "test:coverage": "npm run test:coverage -w services/order-service",
     "db:migrate": "npm run db:migrate -w services/order-service",
@@ -28,7 +28,7 @@
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p frontend-preview/tsconfig.json",
     "validate": "npm run lint && npm run format:check && npm run typecheck",
     "prepare": "husky"
   },

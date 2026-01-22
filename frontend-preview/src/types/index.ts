@@ -96,12 +96,7 @@ export interface OrderItem {
  * const status: OrderStatus = 'CONFIRMED';
  * ```
  */
-export type OrderStatus =
-  | 'CREATED'
-  | 'CONFIRMED'
-  | 'DISPATCHED'
-  | 'DELIVERED'
-  | 'CANCELLED';
+export type OrderStatus = 'CREATED' | 'CONFIRMED' | 'DISPATCHED' | 'DELIVERED' | 'CANCELLED';
 
 /**
  * Represents a delivery order in the system.

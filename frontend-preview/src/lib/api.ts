@@ -4,13 +4,7 @@
  * @module lib/api
  */
 
-import {
-  ApiResponse,
-  LoginResponse,
-  Order,
-  OrderStats,
-  Retailer,
-} from '@/types';
+import { ApiResponse, LoginResponse, Order, OrderStats, Retailer } from '@/types';
 
 /** Base URL for API requests, configurable via environment variable */
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
@@ -53,10 +47,7 @@ class ApiClient {
    * @throws Error if the request fails or returns a non-OK status
    * @private
    */
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -100,10 +91,7 @@ class ApiClient {
    * }
    * ```
    */
-  async login(
-    email: string,
-    password: string
-  ): Promise<ApiResponse<LoginResponse>> {
+  async login(email: string, password: string): Promise<ApiResponse<LoginResponse>> {
     return this.request<LoginResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
@@ -142,7 +130,9 @@ class ApiClient {
    * @returns Promise resolving to new access and refresh tokens
    * @throws Error if refresh token is invalid or expired
    */
-  async refreshToken(refreshToken: string): Promise<ApiResponse<{ accessToken: string; refreshToken: string }>> {
+  async refreshToken(
+    refreshToken: string
+  ): Promise<ApiResponse<{ accessToken: string; refreshToken: string }>> {
     return this.request('/auth/refresh', {
       method: 'POST',
       body: JSON.stringify({ refreshToken }),
@@ -261,10 +251,7 @@ class ApiClient {
    * @returns Promise resolving to the updated order
    * @throws Error if the status transition is invalid
    */
-  async updateOrderStatus(
-    id: string,
-    status: string
-  ): Promise<ApiResponse<Order>> {
+  async updateOrderStatus(id: string, status: string): Promise<ApiResponse<Order>> {
     return this.request<Order>(`/orders/${id}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ status }),
@@ -308,10 +295,7 @@ class ApiClient {
    * @returns Promise resolving to the updated order
    * @throws Error if order is not in CREATED status or item not found
    */
-  async removeOrderItem(
-    orderId: string,
-    productId: string
-  ): Promise<ApiResponse<Order>> {
+  async removeOrderItem(orderId: string, productId: string): Promise<ApiResponse<Order>> {
     return this.request<Order>(`/orders/${orderId}/items/${productId}`, {
       method: 'DELETE',
     });
@@ -346,10 +330,7 @@ class ApiClient {
    * @param params.limit - Number of items per page
    * @returns Promise resolving to an array of retailers
    */
-  async getRetailers(params?: {
-    page?: number;
-    limit?: number;
-  }): Promise<ApiResponse<Retailer[]>> {
+  async getRetailers(params?: { page?: number; limit?: number }): Promise<ApiResponse<Retailer[]>> {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set('page', params.page.toString());
     if (params?.limit) searchParams.set('limit', params.limit.toString());

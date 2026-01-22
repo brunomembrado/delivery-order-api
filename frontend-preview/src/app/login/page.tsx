@@ -81,12 +81,8 @@ export default function LoginPage(): React.JSX.Element {
           <div className="flex justify-center">
             <Package className="h-12 w-12 text-primary-600" />
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Delivery Order Portal
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign in to manage your orders
-          </p>
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Delivery Order Portal</h2>
+          <p className="mt-2 text-sm text-gray-600">Sign in to manage your orders</p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -110,7 +106,7 @@ export default function LoginPage(): React.JSX.Element {
                 className="input"
                 placeholder="Enter your email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
               />
             </div>
 
@@ -127,17 +123,13 @@ export default function LoginPage(): React.JSX.Element {
                 className="input"
                 placeholder="Enter your password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
               />
             </div>
           </div>
 
           <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full btn-primary py-3 text-lg"
-            >
+            <button type="submit" disabled={isLoading} className="w-full btn-primary py-3 text-lg">
               {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
@@ -149,9 +141,7 @@ export default function LoginPage(): React.JSX.Element {
               <div className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-50 text-gray-500">
-                Test Accounts
-              </span>
+              <span className="px-2 bg-gray-50 text-gray-500">Test Accounts</span>
             </div>
           </div>
 

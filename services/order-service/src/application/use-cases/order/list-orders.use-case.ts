@@ -20,17 +20,20 @@ export class ListOrdersUseCase {
     paginationDto?: PaginationDTO
   ): Promise<PaginatedOrdersResponseDTO> {
     // Validate filters if provided
-    const filters: OrderFilters = filterDto ? validateOrThrow(orderFilterSchema, filterDto) : {};
+    const validatedFilters = filterDto ? validateOrThrow(orderFilterSchema, filterDto) : {};
+    const filters: OrderFilters = {
+      ...validatedFilters,
+      status: validatedFilters.status as OrderStatusEnum | undefined,
+    };
 
-    // Validate and set default pagination
-    const pagination: PaginationOptions = paginationDto
-      ? validateOrThrow(paginationSchema, paginationDto)
-      : { page: 1, limit: 10, sortOrder: 'desc' };
-
-    // Convert string status to enum if provided
-    if (filters.status) {
-      filters.status = filters.status as OrderStatusEnum;
-    }
+    // Validate and set default pagination (schema has defaults, but TS needs explicit fallbacks)
+    const validatedPagination = validateOrThrow(paginationSchema, paginationDto ?? {});
+    const pagination: PaginationOptions = {
+      page: validatedPagination.page ?? 1,
+      limit: validatedPagination.limit ?? 10,
+      sortBy: validatedPagination.sortBy,
+      sortOrder: validatedPagination.sortOrder,
+    };
 
     const result = await this.orderRepository.findAll(filters, pagination);
 
@@ -51,9 +54,13 @@ export class ListOrdersUseCase {
     retailerId: string,
     paginationDto?: PaginationDTO
   ): Promise<PaginatedOrdersResponseDTO> {
-    const pagination: PaginationOptions = paginationDto
-      ? validateOrThrow(paginationSchema, paginationDto)
-      : { page: 1, limit: 10, sortOrder: 'desc' };
+    const validatedPagination = validateOrThrow(paginationSchema, paginationDto ?? {});
+    const pagination: PaginationOptions = {
+      page: validatedPagination.page ?? 1,
+      limit: validatedPagination.limit ?? 10,
+      sortBy: validatedPagination.sortBy,
+      sortOrder: validatedPagination.sortOrder,
+    };
 
     const result = await this.orderRepository.findByRetailerId(retailerId, pagination);
 

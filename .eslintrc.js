@@ -71,7 +71,7 @@ module.exports = {
     '*.config.js',
     '*.config.ts',
     '**/prisma/**', // Prisma schema and seed files
-    'web-portal/', // Has its own ESLint config
+    'frontend-preview/', // Has its own ESLint config
   ],
   overrides: [
     {
