@@ -1,5 +1,26 @@
 # Delivery Order API
 
+---
+
+## Hello Zubale Team!
+
+Thank you for taking the time to review my project. I've prepared **video
+walkthroughs** to guide you through the codebase and demonstrate the application
+in action. Please watch these before diving into the code:
+
+| Video                                                                                        | Description                                        |
+| -------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| [Video 1: Project Overview](https://www.loom.com/share/5d6c8582dfd14d9a9bc88b85be4430cb)     | Introduction and high-level architecture           |
+| [Video 2: Backend Deep Dive](https://www.loom.com/share/ef0cc875d1b24d1189176d7203bc60e2)    | Clean Architecture, API design, and business logic |
+| [Video 3: Frontend Walkthrough](https://www.loom.com/share/0795969adbd64296852e3f1e461eff0a) | Next.js dashboard and user interface               |
+| [Video 4: Demo & Testing](https://www.loom.com/share/75d680cf20cb4d9cb8838156532b4e6a)       | Live demonstration and test coverage               |
+
+I hope these videos provide helpful context for understanding my approach to
+building production-ready applications. Looking forward to discussing this
+project with you!
+
+---
+
 A production-grade delivery order management system I built to demonstrate my
 understanding of enterprise software engineering practices including Clean
 Architecture, Domain-Driven Design, and modern DevOps workflows.

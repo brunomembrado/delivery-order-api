@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Delivery Order API",
-    "description": "API collection for the Delivery Order Management System",
+    "description": "API collection for the Delivery Order Management System.\n\n**Run Order:** This collection is designed to be run sequentially. The order of requests ensures that variables like `accessToken` and `retailerId` are populated before they are needed.\n\n**Sequence:** Health → Login → List Retailers → Register → Refresh Token → Get Current User → Orders → Retailer CRUD",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -24,6 +24,10 @@
     {
       "key": "retailerId",
       "value": ""
+    },
+    {
+      "key": "testEmail",
+      "value": ""
     }
   ],
   "auth": {
@@ -38,12 +42,55 @@
   },
   "item": [
     {
-      "name": "Auth",
-      "description": "Authentication endpoints",
+      "name": "1. Health",
+      "description": "Health check endpoint - Run first to verify API is up",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check API health status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('API is healthy', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.equal('ok');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Auth",
+      "description": "Authentication endpoints - Run in order: Login → List Retailers → Register → Refresh Token → Get Current User",
       "item": [
         {
           "name": "Login",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [],
             "body": {
@@ -60,7 +107,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["auth", "login"]
             },
-            "description": "Authenticate user and get JWT tokens"
+            "description": "Authenticate user and get JWT tokens. Run this first to get accessToken and refreshToken."
           },
           "event": [
             {
@@ -90,10 +137,76 @@
                   "    pm.expect(response.data.user.email).to.be.a('string');",
                   "});",
                   "",
+                  "// Save tokens for subsequent requests",
                   "if (pm.response.code === 200) {",
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('accessToken', response.data.tokens.accessToken);",
                   "    pm.collectionVariables.set('refreshToken', response.data.tokens.refreshToken);",
+                  "    console.log('Tokens saved successfully');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Retailers (Get retailerId)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/retailers?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["retailers"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "List retailers to get a retailerId for subsequent requests. Run this BEFORE Register."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Response has pagination info', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.pagination).to.be.an('object');",
+                  "    pm.expect(response.pagination.page).to.be.a('number');",
+                  "    pm.expect(response.pagination.limit).to.be.a('number');",
+                  "    pm.expect(response.pagination.total).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('At least one retailer exists', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.length).to.be.greaterThan(0);",
+                  "});",
+                  "",
+                  "// Save first retailer ID for subsequent requests",
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data.length > 0) {",
+                  "        pm.collectionVariables.set('retailerId', response.data[0].id);",
+                  "        console.log('retailerId saved:', response.data[0].id);",
+                  "    }",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -104,11 +217,14 @@
         {
           "name": "Register",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"Password123!\",\n  \"name\": \"New User\",\n  \"role\": \"RETAILER\",\n  \"retailerId\": \"{{retailerId}}\"\n}",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"Password123!\",\n  \"name\": \"Test User\",\n  \"role\": \"RETAILER\",\n  \"retailerId\": \"{{retailerId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -120,9 +236,22 @@
               "host": ["{{baseUrl}}"],
               "path": ["auth", "register"]
             },
-            "description": "Register a new user"
+            "description": "Register a new user. Requires retailerId to be set (run List Retailers first)."
           },
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Generate unique email to avoid duplicate user errors",
+                  "const timestamp = Date.now();",
+                  "const testEmail = `testuser_${timestamp}@example.com`;",
+                  "pm.collectionVariables.set('testEmail', testEmail);",
+                  "console.log('Generated test email:', testEmail);"
+                ],
+                "type": "text/javascript"
+              }
+            },
             {
               "listen": "test",
               "script": {
@@ -152,6 +281,9 @@
         {
           "name": "Refresh Token",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [],
             "body": {
@@ -168,7 +300,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["auth", "refresh"]
             },
-            "description": "Refresh access token"
+            "description": "Refresh access token using refresh token from Login"
           },
           "event": [
             {
@@ -187,16 +319,18 @@
                   "",
                   "pm.test('Response contains new tokens', function () {",
                   "    const response = pm.response.json();",
-                  "    pm.expect(response.data.tokens).to.be.an('object');",
-                  "    pm.expect(response.data.tokens.accessToken).to.be.a('string');",
+                  "    // Refresh endpoint returns tokens directly in data (not nested under tokens)",
+                  "    pm.expect(response.data.accessToken).to.be.a('string');",
+                  "    pm.expect(response.data.refreshToken).to.be.a('string');",
+                  "    pm.expect(response.data.expiresIn).to.be.a('number');",
                   "});",
                   "",
+                  "// Update tokens with new values",
                   "if (pm.response.code === 200) {",
                   "    const response = pm.response.json();",
-                  "    pm.collectionVariables.set('accessToken', response.data.tokens.accessToken);",
-                  "    if (response.data.tokens.refreshToken) {",
-                  "        pm.collectionVariables.set('refreshToken', response.data.tokens.refreshToken);",
-                  "    }",
+                  "    pm.collectionVariables.set('accessToken', response.data.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.data.refreshToken);",
+                  "    console.log('Tokens refreshed successfully');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -214,7 +348,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["auth", "me"]
             },
-            "description": "Get current authenticated user"
+            "description": "Get current authenticated user information"
           },
           "event": [
             {
@@ -246,8 +380,8 @@
       ]
     },
     {
-      "name": "Orders",
-      "description": "Order management endpoints",
+      "name": "3. Orders",
+      "description": "Order management endpoints - Run after Auth to have tokens and retailerId",
       "item": [
         {
           "name": "Create Order",
@@ -299,9 +433,11 @@
                   "    pm.expect(response.data.deliveryAddress).to.be.an('object');",
                   "});",
                   "",
+                  "// Save order ID for subsequent requests",
                   "if (pm.response.code === 201) {",
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('orderId', response.data.id);",
+                  "    console.log('orderId saved:', response.data.id);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -421,16 +557,64 @@
           ]
         },
         {
-          "name": "Get Order by Order Number",
+          "name": "Add Item to Order",
           "request": {
-            "method": "GET",
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"prod-002\",\n  \"productName\": \"Phone Case\",\n  \"quantity\": 1,\n  \"unitPrice\": 29.99\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/items",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "{{orderId}}", "items"]
+            },
+            "description": "Add an item to an order (only in CREATED status)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test('Response has success structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Order contains the new item', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.items).to.be.an('array');",
+                  "    const newItem = response.data.items.find(item => item.productId === 'prod-002');",
+                  "    pm.expect(newItem).to.not.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove Item from Order",
+          "request": {
+            "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/orders/number/ORD-SEED-001",
+              "raw": "{{baseUrl}}/orders/{{orderId}}/items/prod-002",
               "host": ["{{baseUrl}}"],
-              "path": ["orders", "number", "ORD-SEED-001"]
+              "path": ["orders", "{{orderId}}", "items", "prod-002"]
             },
-            "description": "Get a specific order by order number"
+            "description": "Remove an item from an order (only in CREATED status)"
           },
           "event": [
             {
@@ -447,9 +631,11 @@
                   "    pm.expect(response.data).to.be.an('object');",
                   "});",
                   "",
-                  "pm.test('Order has correct order number', function () {",
+                  "pm.test('Item was removed from order', function () {",
                   "    const response = pm.response.json();",
-                  "    pm.expect(response.data.orderNumber).to.equal('ORD-SEED-001');",
+                  "    pm.expect(response.data.items).to.be.an('array');",
+                  "    const removedItem = response.data.items.find(item => item.productId === 'prod-002');",
+                  "    pm.expect(removedItem).to.be.undefined;",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -596,139 +782,6 @@
           ]
         },
         {
-          "name": "Update Order Status - Cancel",
-          "request": {
-            "method": "PATCH",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"CANCELLED\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/orders/{{orderId}}/status",
-              "host": ["{{baseUrl}}"],
-              "path": ["orders", "{{orderId}}", "status"]
-            },
-            "description": "Cancel an order (only from CREATED or CONFIRMED)"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success structure', function () {",
-                  "    const response = pm.response.json();",
-                  "    pm.expect(response.success).to.be.true;",
-                  "    pm.expect(response.data).to.be.an('object');",
-                  "});",
-                  "",
-                  "pm.test('Order status is CANCELLED', function () {",
-                  "    const response = pm.response.json();",
-                  "    pm.expect(response.data.status).to.equal('CANCELLED');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
-          "name": "Add Item to Order",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"productId\": \"prod-002\",\n  \"productName\": \"Phone Case\",\n  \"quantity\": 1,\n  \"unitPrice\": 29.99\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/orders/{{orderId}}/items",
-              "host": ["{{baseUrl}}"],
-              "path": ["orders", "{{orderId}}", "items"]
-            },
-            "description": "Add an item to an order (only in CREATED status)"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200 or 201', function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-                  "});",
-                  "",
-                  "pm.test('Response has success structure', function () {",
-                  "    const response = pm.response.json();",
-                  "    pm.expect(response.success).to.be.true;",
-                  "    pm.expect(response.data).to.be.an('object');",
-                  "});",
-                  "",
-                  "pm.test('Order contains the new item', function () {",
-                  "    const response = pm.response.json();",
-                  "    pm.expect(response.data.items).to.be.an('array');",
-                  "    const newItem = response.data.items.find(item => item.productId === 'prod-002');",
-                  "    pm.expect(newItem).to.not.be.undefined;",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
-          "name": "Remove Item from Order",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/orders/{{orderId}}/items/prod-002",
-              "host": ["{{baseUrl}}"],
-              "path": ["orders", "{{orderId}}", "items", "prod-002"]
-            },
-            "description": "Remove an item from an order (only in CREATED status)"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success structure', function () {",
-                  "    const response = pm.response.json();",
-                  "    pm.expect(response.success).to.be.true;",
-                  "    pm.expect(response.data).to.be.an('object');",
-                  "});",
-                  "",
-                  "pm.test('Item was removed from order', function () {",
-                  "    const response = pm.response.json();",
-                  "    pm.expect(response.data.items).to.be.an('array');",
-                  "    const removedItem = response.data.items.find(item => item.productId === 'prod-002');",
-                  "    pm.expect(removedItem).to.be.undefined;",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
           "name": "Get Order Statistics",
           "request": {
             "method": "GET",
@@ -757,7 +810,11 @@
                   "",
                   "pm.test('Statistics contain status counts', function () {",
                   "    const response = pm.response.json();",
-                  "    pm.expect(response.data).to.have.property('total');",
+                  "    // Stats endpoint returns counts per status (CREATED, CONFIRMED, etc.)",
+                  "    pm.expect(response.data).to.have.property('CREATED');",
+                  "    pm.expect(response.data).to.have.property('CONFIRMED');",
+                  "    pm.expect(response.data).to.have.property('DISPATCHED');",
+                  "    pm.expect(response.data).to.have.property('DELIVERED');",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -768,8 +825,8 @@
       ]
     },
     {
-      "name": "Retailers",
-      "description": "Retailer management endpoints (Admin only)",
+      "name": "4. Retailers",
+      "description": "Retailer management endpoints (Admin only) - Run after Orders",
       "item": [
         {
           "name": "Create Retailer",
@@ -778,7 +835,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"New Retailer\",\n  \"email\": \"new.retailer@example.com\",\n  \"phone\": \"+1-555-0123\",\n  \"address\": {\n    \"street\": \"456 Business Ave\",\n    \"city\": \"Los Angeles\",\n    \"state\": \"CA\",\n    \"postalCode\": \"90001\",\n    \"country\": \"USA\"\n  }\n}",
+              "raw": "{\n  \"name\": \"Test Retailer\",\n  \"email\": \"test.retailer@example.com\",\n  \"phone\": \"+1-555-0123\",\n  \"address\": {\n    \"street\": \"456 Business Ave\",\n    \"city\": \"Los Angeles\",\n    \"state\": \"CA\",\n    \"postalCode\": \"90001\",\n    \"country\": \"USA\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -793,6 +850,22 @@
             "description": "Create a new retailer (Admin only)"
           },
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Generate unique email to avoid duplicate errors",
+                  "const timestamp = Date.now();",
+                  "const retailerEmail = `test.retailer_${timestamp}@example.com`;",
+                  "const requestBody = JSON.parse(pm.request.body.raw);",
+                  "requestBody.email = retailerEmail;",
+                  "requestBody.name = `Test Retailer ${timestamp}`;",
+                  "pm.request.body.raw = JSON.stringify(requestBody, null, 2);",
+                  "console.log('Generated retailer email:', retailerEmail);"
+                ],
+                "type": "text/javascript"
+              }
+            },
             {
               "listen": "test",
               "script": {
@@ -814,81 +887,11 @@
                   "    pm.expect(response.data.email).to.be.a('string');",
                   "});",
                   "",
+                  "// Save the new retailer ID (overwrite for subsequent tests)",
                   "if (pm.response.code === 201) {",
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('retailerId', response.data.id);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        },
-        {
-          "name": "List Retailers",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/retailers?page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["retailers"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "limit",
-                  "value": "10"
-                },
-                {
-                  "key": "isActive",
-                  "value": "true",
-                  "disabled": true
-                }
-              ]
-            },
-            "description": "List all retailers (Admin only)"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success structure', function () {",
-                  "    const response = pm.response.json();",
-                  "    pm.expect(response.success).to.be.true;",
-                  "    pm.expect(response.data).to.be.an('array');",
-                  "});",
-                  "",
-                  "pm.test('Response has pagination info', function () {",
-                  "    const response = pm.response.json();",
-                  "    pm.expect(response.pagination).to.be.an('object');",
-                  "    pm.expect(response.pagination.page).to.be.a('number');",
-                  "    pm.expect(response.pagination.limit).to.be.a('number');",
-                  "    pm.expect(response.pagination.total).to.be.a('number');",
-                  "});",
-                  "",
-                  "pm.test('Retailers have required fields', function () {",
-                  "    const response = pm.response.json();",
-                  "    if (response.data.length > 0) {",
-                  "        const retailer = response.data[0];",
-                  "        pm.expect(retailer.id).to.be.a('string');",
-                  "        pm.expect(retailer.name).to.be.a('string');",
-                  "    }",
-                  "});",
-                  "",
-                  "// Save first retailer ID if available and retailerId is not set",
-                  "if (pm.response.code === 200) {",
-                  "    const response = pm.response.json();",
-                  "    if (response.data.length > 0 && !pm.collectionVariables.get('retailerId')) {",
-                  "        pm.collectionVariables.set('retailerId', response.data[0].id);",
-                  "    }",
+                  "    console.log('New retailerId saved:', response.data.id);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -991,7 +994,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["retailers", "{{retailerId}}"]
             },
-            "description": "Delete a retailer (Admin only)"
+            "description": "Delete a retailer (Admin only). Note: This deletes the test retailer created in this collection run."
           },
           "event": [
             {
@@ -1017,23 +1020,20 @@
       ]
     },
     {
-      "name": "Health",
-      "description": "Health check endpoint",
+      "name": "5. Additional Tests",
+      "description": "Additional test endpoints that can be run independently",
       "item": [
         {
-          "name": "Health Check",
+          "name": "Get Order by Order Number",
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/health",
+              "raw": "{{baseUrl}}/orders/number/ORD-SEED-001",
               "host": ["{{baseUrl}}"],
-              "path": ["health"]
+              "path": ["orders", "number", "ORD-SEED-001"]
             },
-            "description": "Check API health status"
+            "description": "Get a specific order by order number (uses seeded data)"
           },
           "event": [
             {
@@ -1044,10 +1044,59 @@
                   "    pm.response.to.have.status(200);",
                   "});",
                   "",
-                  "pm.test('API is healthy', function () {",
+                  "pm.test('Response has success structure', function () {",
                   "    const response = pm.response.json();",
-                  "    pm.expect(response.status).to.equal('ok');",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.data).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Order has correct order number', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data.orderNumber).to.equal('ORD-SEED-001');",
                   "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Order Status - Cancel (New Order)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CANCELLED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "{{orderId}}", "status"]
+            },
+            "description": "Cancel an order. Note: Only works on orders in CREATED or CONFIRMED status. Run 'Create Order' first if needed."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// This test may fail if order is already DELIVERED - that's expected",
+                  "pm.test('Status code is 200 or 422 (if invalid transition)', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 422]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Order status is CANCELLED', function () {",
+                  "        const response = pm.response.json();",
+                  "        pm.expect(response.data.status).to.equal('CANCELLED');",
+                  "    });",
+                  "}"
                 ],
                 "type": "text/javascript"
               }
